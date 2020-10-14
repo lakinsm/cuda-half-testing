@@ -109,7 +109,7 @@ int main() {
     std::cout << std::endl;
     std::cout << "CUDA 6.1 32-bit SGEMM, " << full_dim * full_dim << " elements per array, ";
     std::cout << full_dim * full_dim * sizeof(float) / 1000000 << " MB memory per array, ";
-    std::cout << utils.timeDifference() << " seconds" << std::endl;
+    std::cout << utils.timeDifference() << " sec" << std::endl;
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
         assert(full_res1[i] == -4 * full_dim);
@@ -177,7 +177,7 @@ int main() {
     std::cout << std::endl;
     std::cout << "CUDA 6.1 16-bit HGEMM, " << half_dim * half_dim << " elements per array, ";
     std::cout << half_dim * half_dim * sizeof(__half) / 1000000 << " MB memory per array, ";
-    std::cout << utils.timeDifference() << " seconds" << std::endl;
+    std::cout << utils.timeDifference() << " sec" << std::endl;
 
     for(int i = 0; i < half_dim * half_dim; ++i) {
         assert(__half2float(half_res1[i]) == -8192);
@@ -251,8 +251,8 @@ int main() {
     std::cout << std::endl;
     std::cout << "CUDA 6.1 16-32-bit GemmEx, " << half_dim * half_dim << " elements per array, ";
     std::cout << half_dim * half_dim * sizeof(__half) / 1000000 << " and ";
-    std::cout << half_dim * half_dim * sizeof(float) << " MB memory for 16-/32-bit arrays, ";
-    std::cout << utils.timeDifference() << " seconds" << std::endl;
+    std::cout << half_dim * half_dim * sizeof(float) / 1000000 << " MB memory for 16-/32-bit arrays, ";
+    std::cout << utils.timeDifference() << " sec" << std::endl;
 
     for(int i = 0; i < half_dim * half_dim; ++i) {
         assert(mixed_res1[i] == -4 * half_dim);
@@ -320,7 +320,7 @@ int main() {
     std::cout << std::endl;
     std::cout << "CUDA 7.5 32-bit SGEMM, " << full_dim * full_dim << " elements per array, ";
     std::cout << full_dim * full_dim * sizeof(float) / 1000000 << " MB memory per array, ";
-    std::cout << utils.timeDifference() << " seconds" << std::endl;
+    std::cout << utils.timeDifference() << " sec" << std::endl;
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
         assert(full_res2[i] == -4 * full_dim);
@@ -388,12 +388,11 @@ int main() {
     std::cout << std::endl;
     std::cout << "CUDA 7.5 16-bit HGEMM, " << half_dim * half_dim << " elements per array, ";
     std::cout << half_dim * half_dim * sizeof(__half) / 1000000 << " MB memory per array, ";
-    std::cout << utils.timeDifference() << " seconds" << std::endl;
+    std::cout << utils.timeDifference() << " sec" << std::endl;
 
     // CUDA __half has numerical limits (minimum and maximum values) of +/- 8192
     for(int i = 0; i < half_dim * half_dim; ++i) {
-        std::cout << __half2float(half_res1[i]) << std::endl;
-        assert(__half2float(half_res1[i]) == -8192);
+        assert(__half2float(half_res2[i]) == -8192);
     }
 
 
@@ -405,4 +404,79 @@ int main() {
     HANDLE_ERROR( cudaFree( half_A2 ) );
     HANDLE_ERROR( cudaFree( half_B2 ) );
     HANDLE_ERROR( cudaFree( half_C2 ) );
+
+
+
+
+    // Compute on sm_75 with mixed precision
+
+    utils.recordStartTime();
+    // Initialize mixed sm_75
+    HANDLE_ERROR( cudaSetDevice( sm75_gpu_idx ) );
+    cublasHandle_t mixed_handle2;
+    BLAS_HANDLE_ERROR( cublasCreate( &mixed_handle2 ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&mixed_host_A2, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&mixed_host_B2, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&mixed_res2, half_dim * half_dim * sizeof(float), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&mixed_A2, half_dim * half_dim * sizeof(__half) ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&mixed_B2, half_dim * half_dim * sizeof(__half) ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&mixed_C2, half_dim * half_dim * sizeof(float) ) );
+
+    __half mixed_val2 = __float2half(2.0f);
+    __half mixed_nval2 = __float2half(-2.0f);
+    for(int i = 0; i < half_dim * half_dim; ++i) {
+        mixed_host_A2[i] = mixed_val2;
+        mixed_host_B2[i] = mixed_nval2;
+    }
+
+    HANDLE_ERROR( cudaMemcpy( mixed_A2, mixed_host_A2, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( mixed_B2, mixed_host_B2, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaDeviceSynchronize() );
+
+
+    // Compute mixed sm_75
+    BLAS_HANDLE_ERROR( cublasGemmEx(
+            mixed_handle2,
+            CUBLAS_OP_N,
+            CUBLAS_OP_N,
+            half_dim,
+            half_dim,
+            half_dim,
+            &full_alpha,
+            mixed_A2,
+            CUDA_R_16F,
+            half_dim,
+            mixed_B2,
+            CUDA_R_16F,
+            half_dim,
+            &full_beta,
+            mixed_C2,
+            CUDA_R_32F,
+            half_dim,
+            CUDA_R_32F,
+            CUBLAS_GEMM_DEFAULT_TENSOR_OP
+    ) );
+    HANDLE_ERROR( cudaDeviceSynchronize() );
+    HANDLE_ERROR( cudaMemcpy( mixed_res2, mixed_C2, half_dim * half_dim * sizeof(float), cudaMemcpyDeviceToHost ) );
+    utils.recordStopTime();
+
+    std::cout << std::endl;
+    std::cout << "CUDA 7.5 16-32-bit GemmEx, " << half_dim * half_dim << " elements per array, ";
+    std::cout << half_dim * half_dim * sizeof(__half) / 1000000 << " and ";
+    std::cout << half_dim * half_dim * sizeof(float) / 1000000 << " MB memory for 16-/32-bit arrays, ";
+    std::cout << utils.timeDifference() << " sec" << std::endl;
+
+    for(int i = 0; i < half_dim * half_dim; ++i) {
+        assert(mixed_res2[i] == -4 * half_dim);
+    }
+
+
+    // Free sm_75 mixed
+    BLAS_HANDLE_ERROR( cublasDestroy( mixed_handle2 ) );
+    HANDLE_ERROR( cudaFreeHost( mixed_host_A2 ) );
+    HANDLE_ERROR( cudaFreeHost( mixed_host_B2 ) );
+    HANDLE_ERROR( cudaFreeHost( mixed_res2 ) );
+    HANDLE_ERROR( cudaFree( mixed_A2 ) );
+    HANDLE_ERROR( cudaFree( mixed_B2 ) );
+    HANDLE_ERROR( cudaFree( mixed_C2 ) );
 }
