@@ -21,13 +21,17 @@ int main() {
 
 
     // Host data
-    float* full_host1;
+    float* full_host_A1;
+    float* full_host_B1;
     float* full_res1;
-    float* full_host2;
+    float* full_host_A2;
+    float* full_host_B2;
     float* full_res2;
-    __half* half_host1;
+    __half* half_host_A1;
+    __half* half_host_B1;
     __half* half_res1;
-    __half* half_host2;
+    __half* half_host_A2;
+    __half* half_host_B2;
     __half* half_res2;
 
     // Device data
@@ -52,18 +56,20 @@ int main() {
     HANDLE_ERROR( cudaSetDevice( sm61_gpu_idx ) );
     cublasHandle_t full_handle1;
     BLAS_HANDLE_ERROR( cublasCreate( &full_handle1 ) );
-    HANDLE_ERROR( cudaHostAlloc( (void**)&full_host1, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&full_host_A1, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&full_host_B1, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaHostAlloc( (void**)&full_res1, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaMalloc( (void**)&full_A1, full_dim * full_dim * sizeof(float) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&full_B1, full_dim * full_dim * sizeof(float) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&full_C1, full_dim * full_dim * sizeof(float) ) );
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
-        full_host1[i] = 2;
+        full_host_A1[i] = 2;
+        full_host_B1[i] = -2;
     }
 
-    HANDLE_ERROR( cudaMemcpy( full_A1, full_host1, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
-    HANDLE_ERROR( cudaMemcpy( full_B1, full_host1, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( full_A1, full_host_A1, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( full_B1, full_host_B1, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaDeviceSynchronize() );
 
 
@@ -94,13 +100,14 @@ int main() {
     std::cout << utils.timeDifference() << " seconds" << std::endl;
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
-        assert(full_res1[i] == 4 * full_dim);
+        assert(full_res1[i] == -4 * full_dim);
     }
 
 
     // Free sm_61 full
     BLAS_HANDLE_ERROR( cublasDestroy( full_handle1 ) );
-    HANDLE_ERROR( cudaFreeHost( full_host1 ) );
+    HANDLE_ERROR( cudaFreeHost( full_host_A1 ) );
+    HANDLE_ERROR( cudaFreeHost( full_host_B1 ) );
     HANDLE_ERROR( cudaFreeHost( full_res1 ) );
     HANDLE_ERROR( cudaFree( full_A1 ) );
     HANDLE_ERROR( cudaFree( full_B1 ) );
@@ -115,24 +122,22 @@ int main() {
     HANDLE_ERROR( cudaSetDevice( sm61_gpu_idx ) );
     cublasHandle_t half_handle1;
     BLAS_HANDLE_ERROR( cublasCreate( &half_handle1 ) );
-    HANDLE_ERROR( cudaHostAlloc( (void**)&half_host1, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&half_host_A1, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&half_host_B1, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaHostAlloc( (void**)&half_res1, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaMalloc( (void**)&half_A1, half_dim * half_dim * sizeof(__half) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&half_B1, half_dim * half_dim * sizeof(__half) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&half_C1, half_dim * half_dim * sizeof(__half) ) );
 
     __half val1 = __float2half(2.0f);
+    __half nval1 = __float2half(-2.0f);
     for(int i = 0; i < half_dim * half_dim; ++i) {
-        half_host1[i] = val1;
+        half_host_A1[i] = val1;
+        half_host_B1[i] = nval1;
     }
 
-    for(int i = 0; i < 10; ++i) {
-        std::cout << __half2float(half_host1[i]) << std::endl;
-    }
-    std::cout << __half2float(half_alpha) << '\t' << __half2float(half_beta) << std::endl;
-
-    HANDLE_ERROR( cudaMemcpy( half_A1, half_host1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
-    HANDLE_ERROR( cudaMemcpy( half_B1, half_host1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( half_A1, half_host_A1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( half_B1, half_host_B1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaDeviceSynchronize() );
 
 
@@ -170,7 +175,8 @@ int main() {
 
     // Free sm_61 half
     BLAS_HANDLE_ERROR( cublasDestroy( half_handle1 ) );
-    HANDLE_ERROR( cudaFreeHost( half_host1 ) );
+    HANDLE_ERROR( cudaFreeHost( half_host_A1 ) );
+    HANDLE_ERROR( cudaFreeHost( half_host_B1 ) );
     HANDLE_ERROR( cudaFreeHost( half_res1 ) );
     HANDLE_ERROR( cudaFree( half_A1 ) );
     HANDLE_ERROR( cudaFree( half_B1 ) );
@@ -178,27 +184,27 @@ int main() {
 
 
 
-//////////////////////////
-
-// Compute on sm_75 with full precision
+    // Compute on sm_75 with full precision
 
     utils.recordStartTime();
     // Initialize full sm_75
     HANDLE_ERROR( cudaSetDevice( sm75_gpu_idx ) );
     cublasHandle_t full_handle2;
     BLAS_HANDLE_ERROR( cublasCreate( &full_handle2 ) );
-    HANDLE_ERROR( cudaHostAlloc( (void**)&full_host2, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&full_host_A2, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&full_host_B2, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaHostAlloc( (void**)&full_res2, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaMalloc( (void**)&full_A2, full_dim * full_dim * sizeof(float) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&full_B2, full_dim * full_dim * sizeof(float) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&full_C2, full_dim * full_dim * sizeof(float) ) );
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
-        full_host2[i] = 2;
+        full_host_A2[i] = 2;
+        full_host_B2[i] = -2;
     }
 
-    HANDLE_ERROR( cudaMemcpy( full_A2, full_host2, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
-    HANDLE_ERROR( cudaMemcpy( full_B2, full_host2, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( full_A2, full_host_A2, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( full_B2, full_host_B2, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaDeviceSynchronize() );
 
 
@@ -229,13 +235,14 @@ int main() {
     std::cout << utils.timeDifference() << " seconds" << std::endl;
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
-        assert(full_res2[i] == 4 * full_dim);
+        assert(full_res2[i] == -4 * full_dim);
     }
 
 
     // Free sm_75 full
     BLAS_HANDLE_ERROR( cublasDestroy( full_handle2 ) );
-    HANDLE_ERROR( cudaFreeHost( full_host2 ) );
+    HANDLE_ERROR( cudaFreeHost( full_host_A2 ) );
+    HANDLE_ERROR( cudaFreeHost( full_host_B2 ) );
     HANDLE_ERROR( cudaFreeHost( full_res2 ) );
     HANDLE_ERROR( cudaFree( full_A2 ) );
     HANDLE_ERROR( cudaFree( full_B2 ) );
@@ -250,24 +257,22 @@ int main() {
     HANDLE_ERROR( cudaSetDevice( sm75_gpu_idx ) );
     cublasHandle_t half_handle2;
     BLAS_HANDLE_ERROR( cublasCreate( &half_handle2 ) );
-    HANDLE_ERROR( cudaHostAlloc( (void**)&half_host2, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&half_host_A2, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&half_host_B2, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaHostAlloc( (void**)&half_res2, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
     HANDLE_ERROR( cudaMalloc( (void**)&half_A2, half_dim * half_dim * sizeof(__half) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&half_B2, half_dim * half_dim * sizeof(__half) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&half_C2, half_dim * half_dim * sizeof(__half) ) );
 
     __half val2 = __float2half(2.0f);
+    __half nval2 = __float2half(-2.0f);
     for(int i = 0; i < half_dim * half_dim; ++i) {
-        half_host2[i] = val2;
+        half_host_A2[i] = val2;
+        half_host_B2[i] = nval2;
     }
 
-    for(int i = 0; i < 10; ++i) {
-        std::cout << __half2float(half_host2[i]) << std::endl;
-    }
-    std::cout << __half2float(half_alpha) << '\t' << __half2float(half_beta) << std::endl;
-
-    HANDLE_ERROR( cudaMemcpy( half_A2, half_host2, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
-    HANDLE_ERROR( cudaMemcpy( half_B2, half_host2, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( half_A2, half_host_A2, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( half_B2, half_host_B2, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaDeviceSynchronize() );
 
 
@@ -305,13 +310,10 @@ int main() {
 
     // Free sm_75 half
     BLAS_HANDLE_ERROR( cublasDestroy( half_handle2 ) );
-    HANDLE_ERROR( cudaFreeHost( half_host2 ) );
+    HANDLE_ERROR( cudaFreeHost( half_host_A2 ) );
+    HANDLE_ERROR( cudaFreeHost( half_host_B2 ) );
     HANDLE_ERROR( cudaFreeHost( half_res2 ) );
     HANDLE_ERROR( cudaFree( half_A2 ) );
     HANDLE_ERROR( cudaFree( half_B2 ) );
     HANDLE_ERROR( cudaFree( half_C2 ) );
-
-
-
-
 }
