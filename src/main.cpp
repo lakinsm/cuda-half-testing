@@ -11,12 +11,13 @@ int main() {
     int sm75_gpu_idx = 0;  // 2080Ti, Turing CUDA 7.5
     int full_dim = 10000;
     int half_dim = full_dim;
-    int half2_dim = full_dim / 2;
 
 
     // cuBLAS handles, constants, etc
-    float alpha = 1.0f;
-    float beta = 0.0f;
+    float full_alpha = 1.0f;
+    float full_beta = 0.0f;
+    __half half_alpha = __float2half(1);
+    __half half_beta = __float2half(0);
 
 
     // Host data
@@ -28,10 +29,6 @@ int main() {
     __half* half_res1;
     __half* half_host2;
     __half* half_res2;
-    __half2* half2_host1;
-    __half2* half2_res1;
-    __half2* half2_host2;
-    __half2* half2_res2;
 
     // Device data
     float* full_A1;
@@ -46,12 +43,6 @@ int main() {
     __half* half_A2;
     __half* half_B2;
     __half* half_C2;
-    __half2* half2_A1;
-    __half2* half2_B1;
-    __half2* half2_C1;
-    __half2* half2_A2;
-    __half2* half2_B2;
-    __half2* half2_C2;
 
 
     // Compute on sm_61 with full precision
@@ -84,12 +75,12 @@ int main() {
                 full_dim,
                 full_dim,
                 full_dim,
-                &alpha,
+                &full_alpha,
                 full_A1,
                 full_dim,
                 full_B1,
                 full_dim,
-                &beta,
+                &full_beta,
                 full_C1,
                 full_dim
             ) );
@@ -117,7 +108,7 @@ int main() {
 
 
 
-// Compute on sm_61 with half precision
+    // Compute on sm_61 with half precision
 
     utils.recordStartTime();
     // Initialize full sm_61
@@ -130,8 +121,9 @@ int main() {
     HANDLE_ERROR( cudaMalloc( (void**)&half_B1, half_dim * half_dim * sizeof(__half) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&half_C1, half_dim * half_dim * sizeof(__half) ) );
 
+    __half val1 = __float2half(2);
     for(int i = 0; i < half_dim * half_dim; ++i) {
-        half_host1[i] = 2;
+        half_host1[i] = val1;
     }
 
     HANDLE_ERROR( cudaMemcpy( half_A1, half_host1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
@@ -139,7 +131,7 @@ int main() {
     HANDLE_ERROR( cudaDeviceSynchronize() );
 
 
-    // Compute full sm_61
+    // Compute half sm_61
     BLAS_HANDLE_ERROR( cublasHgemm(
             half_handle1,
             CUBLAS_OP_N,
@@ -147,12 +139,12 @@ int main() {
             half_dim,
             half_dim,
             half_dim,
-            &alpha,
+            &half_alpha,
             half_A1,
             half_dim,
             half_B1,
             half_dim,
-            &beta,
+            &half_beta,
             half_C1,
             half_dim
     ) );
@@ -166,25 +158,18 @@ int main() {
     std::cout << utils.timeDifference() << " seconds" << std::endl;
 
     for(int i = 0; i < half_dim * half_dim; ++i) {
-        assert(half_res1[i] == 4 * half_dim);
+        assert(__half2float(half_res1[i]) == 4 * half_dim);
     }
 
 
-    // Free sm_61 full
+    // Free sm_61 half
     BLAS_HANDLE_ERROR( cublasDestroy( half_handle1 ) );
     HANDLE_ERROR( cudaFreeHost( half_host1 ) );
     HANDLE_ERROR( cudaFreeHost( half_res1 ) );
     HANDLE_ERROR( cudaFree( half_A1 ) );
     HANDLE_ERROR( cudaFree( half_B1 ) );
     HANDLE_ERROR( cudaFree( half_C1 ) );
-
-//    for(int i = 0; i < full_dim * full_dim; ++i) {
-//        half_precision_mat[i] = __float2half(full_precision_mat[i]);
-//    }
-//
-//    for(int i = 0; i < half2_dim * half2_dim; ++i) {
-//        half2_precision_mat[i] = __floats2half2_rn(full_precision_mat[2*i], full_precision_mat[(2*i)+1]);
-//    }
+    
 
 
 
