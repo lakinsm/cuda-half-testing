@@ -8,10 +8,10 @@ SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name "*.$(SRCEXT)")
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 CFLAGS := -g -std=c++14
-CFLAGS += -gencode=arch=compute_60,code=sm_60
-CFLAGS += -gencode=arch=compute_61,code=sm_61
-CFLAGS += -gencode=arch=compute_70,code=sm_70
-CFLAGS += -gencode=arch=compute_75,code=sm_75 -gencode=arch=compute_75,code=compute_75
+#CFLAGS += -gencode=arch=compute_60,code=sm_60
+#CFLAGS += -gencode=arch=compute_61,code=sm_61
+#CFLAGS += -gencode=arch=compute_70,code=sm_70
+#CFLAGS += -gencode=arch=compute_75,code=sm_75 -gencode=arch=compute_75,code=compute_75
 CFLAGS += -Xcompiler "-fopenmp -O3 -fomit-frame-pointer -fno-operator-names -msse3 -fexcess-precision=fast -funroll-loops -march=native -mfpmath=sse"
 LIB := -lgomp -lcuda -lcudart -lcublas -lgsl
 INC := -I include
