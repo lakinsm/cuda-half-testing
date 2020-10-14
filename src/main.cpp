@@ -7,7 +7,7 @@
 
 int main() {
     HostUtils utils;
-    int sm61_gpu_idx = 0;  // 1080Ti, Pascal CUDA 6.1
+    int sm61_gpu_idx = 3;  // 1080Ti, Pascal CUDA 6.1
     int sm75_gpu_idx = 0;  // 2080Ti, Turing CUDA 7.5
     int full_dim = 10000;
     int half_dim = full_dim;
