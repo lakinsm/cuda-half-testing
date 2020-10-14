@@ -7,7 +7,7 @@ TARGET := bin/half
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name "*.$(SRCEXT)")
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS := -g -std=c++14 -arch=sm_60
+CFLAGS := -g -std=c++14
 CFLAGS += -gencode=arch=compute_60,code=sm_60
 CFLAGS += -gencode=arch=compute_61,code=sm_61
 CFLAGS += -gencode=arch=compute_70,code=sm_70
