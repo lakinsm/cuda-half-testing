@@ -21,14 +21,23 @@ int main() {
 
 
     // Host data
-    float* full_host, full_res;
-    __half* half_host, half_res;
-    __half2* half2_host, half2_res;
+    float* full_host;
+    float* full_res;
+    __half* half_host;
+    __half* half_res;
+    __half2* half2_host
+    __half2* half2_res;
 
     // Device data
-    float* full_A, full_B, full_C;
-    __half* half_A, half_B, half_C;
-    __half2* half2_A, half2_B, half2_C;
+    float* full_A;
+    float* full_B;
+    float* full_C;
+    __half* half_A;
+    __half* half_B;
+    __half* half_C;
+    __half2* half2_A;
+    __half2* half2_B;
+    __half2* half2_C;
 
 
 
