@@ -52,7 +52,7 @@ int main() {
     __half2* half2_A2;
     __half2* half2_B2;
     __half2* half2_C2;
-    
+
 
     // Compute on sm_61 with full precision
 
