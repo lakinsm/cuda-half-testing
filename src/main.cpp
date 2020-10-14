@@ -241,7 +241,7 @@ int main() {
             mixed_C1,
             CUDA_R_32F,
             half_dim,
-            CUBLAS_COMPUTE_32F,
+            CUDA_R_32F,
             CUBLAS_GEMM_DEFAULT_TENSOR_OP
     ) );
     HANDLE_ERROR( cudaDeviceSynchronize() );
