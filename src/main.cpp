@@ -62,8 +62,6 @@ int main() {
     HANDLE_ERROR( cudaMemcpy( full_B, full_host, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaDeviceSynchronize() );
 
-    std::exit(EXIT_FAILURE);
-
 
     // Compute full sm_61
     BLAS_HANDLE_ERROR( cublasSgemm(
