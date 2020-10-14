@@ -98,8 +98,8 @@ int main() {
     utils.recordStopTime();
 
     std::cout << std::endl;
-    std::cout << "CUDA 6.1 32-bit SGEMM, " << full_dim * full_dim << " elements, ";
-    std::cout << full_dim * full_dim * sizeof(float) / 1000000 << " MB memory use, ";
+    std::cout << "CUDA 6.1 32-bit SGEMM, " << full_dim * full_dim << " elements per array, ";
+    std::cout << full_dim * full_dim * sizeof(float) / 1000000 << " MB memory per array, ";
     std::cout << utils.timeDifference() << " seconds" << std::endl;
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
@@ -117,7 +117,66 @@ int main() {
 
 
 
+// Compute on sm_61 with half precision
 
+    utils.recordStartTime();
+    // Initialize full sm_61
+    HANDLE_ERROR( cudaSetDevice( sm61_gpu_idx ) );
+    cublasHandle_t half_handle1;
+    BLAS_HANDLE_ERROR( cublasCreate( &half_handle1 ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&half_host1, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( (void**)&half_res1, half_dim * half_dim * sizeof(__half), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&half_A1, half_dim * half_dim * sizeof(__half) ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&half_B1, half_dim * half_dim * sizeof(__half) ) );
+    HANDLE_ERROR( cudaMalloc( (void**)&half_C1, half_dim * half_dim * sizeof(__half) ) );
+
+    for(int i = 0; i < half_dim * half_dim; ++i) {
+        half_host1[i] = 2;
+    }
+
+    HANDLE_ERROR( cudaMemcpy( half_A1, half_host1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaMemcpy( half_B1, half_host1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaDeviceSynchronize() );
+
+
+    // Compute full sm_61
+    BLAS_HANDLE_ERROR( cublasHgemm(
+            half_handle1,
+            CUBLAS_OP_N,
+            CUBLAS_OP_N,
+            half_dim,
+            half_dim,
+            half_dim,
+            &alpha,
+            half_A1,
+            half_dim,
+            half_B1,
+            half_dim,
+            &beta,
+            half_C1,
+            half_dim
+    ) );
+    HANDLE_ERROR( cudaDeviceSynchronize() );
+    HANDLE_ERROR( cudaMemcpy( half_res1, half_C1, half_dim * half_dim * sizeof(__half), cudaMemcpyDeviceToHost ) );
+    utils.recordStopTime();
+
+    std::cout << std::endl;
+    std::cout << "CUDA 6.1 16-bit HGEMM, " << half_dim * half_dim << " elements per array, ";
+    std::cout << half_dim * half_dim * sizeof(__half) / 1000000 << " MB memory per array, ";
+    std::cout << utils.timeDifference() << " seconds" << std::endl;
+
+    for(int i = 0; i < half_dim * half_dim; ++i) {
+        assert(half_res1[i] == 4 * half_dim);
+    }
+
+
+    // Free sm_61 full
+    BLAS_HANDLE_ERROR( cublasDestroy( half_handle1 ) );
+    HANDLE_ERROR( cudaFreeHost( half_host1 ) );
+    HANDLE_ERROR( cudaFreeHost( half_res1 ) );
+    HANDLE_ERROR( cudaFree( half_A1 ) );
+    HANDLE_ERROR( cudaFree( half_B1 ) );
+    HANDLE_ERROR( cudaFree( half_C1 ) );
 
 //    for(int i = 0; i < full_dim * full_dim; ++i) {
 //        half_precision_mat[i] = __float2half(full_precision_mat[i]);
