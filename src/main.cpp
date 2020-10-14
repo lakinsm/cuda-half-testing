@@ -9,7 +9,7 @@ int main() {
     HostUtils utils;
     int sm61_gpu_idx = 2;  // 1080Ti, Pascal CUDA 6.1
     int sm75_gpu_idx = 0;  // 2080Ti, Turing CUDA 7.5
-    int full_dim = 10000;
+    int full_dim = 1000;
     int half_dim = full_dim;
 
 
@@ -243,10 +243,10 @@ int main() {
 
 
 
-    // Compute on sm_61 with half precision
+    // Compute on sm_75 with half precision
 
     utils.recordStartTime();
-    // Initialize full sm_61
+    // Initialize full sm_75
     HANDLE_ERROR( cudaSetDevice( sm75_gpu_idx ) );
     cublasHandle_t half_handle2;
     BLAS_HANDLE_ERROR( cublasCreate( &half_handle2 ) );
@@ -303,7 +303,7 @@ int main() {
     }
 
 
-    // Free sm_61 half
+    // Free sm_75 half
     BLAS_HANDLE_ERROR( cublasDestroy( half_handle2 ) );
     HANDLE_ERROR( cudaFreeHost( half_host2 ) );
     HANDLE_ERROR( cudaFreeHost( half_res2 ) );
