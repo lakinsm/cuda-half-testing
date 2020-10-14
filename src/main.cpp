@@ -254,13 +254,9 @@ int main() {
     std::cout << half_dim * half_dim * sizeof(float) << " MB memory for 16-/32-bit arrays, ";
     std::cout << utils.timeDifference() << " seconds" << std::endl;
 
-    for(int i = 0; i < 5; ++i) {
-        std::cout << mixed_res1[i] << std::endl;
+    for(int i = 0; i < half_dim * half_dim; ++i) {
+        assert(mixed_res1[i] == -4 * half_dim);
     }
-
-//    for(int i = 0; i < half_dim * half_dim; ++i) {
-//        assert(mixed_res1[i] == -4 * half_dim);
-//    }
 
 
     // Free sm_61 mixed
@@ -396,6 +392,7 @@ int main() {
 
     // CUDA __half has numerical limits (minimum and maximum values) of +/- 8192
     for(int i = 0; i < half_dim * half_dim; ++i) {
+        std::cout << __half2float(half_res1[i]) << std::endl;
         assert(__half2float(half_res1[i]) == -8192);
     }
 
