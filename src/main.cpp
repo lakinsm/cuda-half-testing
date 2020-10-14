@@ -16,14 +16,14 @@ int main() {
     // cuBLAS handles, constants, etc
     float alpha = 1;
     float beta = 0;
-    cublashandle_t handle;
+    cublasHandle_t handle;
     BLAS_HANDLE_ERROR( cublasCreate( &handle ) );
 
 
     // Host data
     float* full_host, full_res;
-    __half* half_precision_mat;
-    __half2* half2_precision_mat;
+    __half* half_host, half_res;
+    __half2* half2_host, half2_res;
 
     // Device data
     float* full_A, full_B, full_C;
@@ -45,7 +45,7 @@ int main() {
     HANDLE_ERROR( cudaMalloc( (void**)&full_C, full_dim * full_dim * sizeof(float) ) );
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
-        full_precision_mat[i] = 2;
+        full_host[i] = 2;
     }
 
     HANDLE_ERROR( cudaMemcpy( full_A, full_host, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
