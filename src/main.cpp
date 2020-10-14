@@ -34,7 +34,6 @@ int main() {
 
 
 
-
     // Compute on sm_61 with full precision
 
     utils.recordStartTime();
