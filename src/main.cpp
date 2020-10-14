@@ -1,6 +1,6 @@
 #include "gpu_macros.h"
 #include "host_utils.h"
-#include <cuda_fp16.h>
+//#include <cuda_fp16.h>
 #include <iostream>
 #include <cassert>
 
@@ -33,12 +33,12 @@ int main() {
     float* full_A;
     float* full_B;
     float* full_C;
-    __half* half_A;
-    __half* half_B;
-    __half* half_C;
-    __half2* half2_A;
-    __half2* half2_B;
-    __half2* half2_C;
+//    __half* half_A;
+//    __half* half_B;
+//    __half* half_C;
+//    __half2* half2_A;
+//    __half2* half2_B;
+//    __half2* half2_C;
 
 
 
