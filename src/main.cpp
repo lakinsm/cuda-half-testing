@@ -8,7 +8,7 @@ int main() {
     HostUtils utils;
     int sm61_gpu_idx = 2;  // 1080Ti, Pascal CUDA 6.1
     int sm75_gpu_idx = 0;  // 2080Ti, Turing CUDA 7.5
-    int full_dim = 10;
+    int full_dim = 1000;
     int half_dim = full_dim;
     int half2_dim = full_dim / 2;
 
@@ -84,8 +84,9 @@ int main() {
     utils.recordStopTime();
 
     std::cout << std::endl;
-    std::cout << "CUDA 6.1 32-bit SGEMM, " << full_dim << " elements, " << utils.timeDifference();
-    std::cout << " seconds" << std::endl;
+    std::cout << "CUDA 6.1 32-bit SGEMM, " << full_dim * full_dim << " elements, ";
+    std::cout << full_dim * full_dim * sizeof(float) / 1000000 << " MB memory use, ";
+    std::cout << utils.timeDifference() << " seconds" << std::endl;
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
         assert(full_res[i] == 4 * full_dim);
