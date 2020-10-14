@@ -25,7 +25,7 @@ int main() {
     float* full_res;
     __half* half_host;
     __half* half_res;
-    __half2* half2_host
+    __half2* half2_host;
     __half2* half2_res;
 
     // Device data
