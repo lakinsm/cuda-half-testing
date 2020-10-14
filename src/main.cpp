@@ -126,6 +126,11 @@ int main() {
         half_host1[i] = val1;
     }
 
+    for(int i = 0; i < 10; ++i) {
+        std::cout << __half2float(half_host1[i]) << std::endl;
+    }
+    std::cout << __half2float(half_alpha) << '\t' << __half2float(half_beta) << std::endl;
+
     HANDLE_ERROR( cudaMemcpy( half_A1, half_host1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( half_B1, half_host1, half_dim * half_dim * sizeof(__half), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaDeviceSynchronize() );
