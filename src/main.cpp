@@ -65,6 +65,7 @@ int main() {
                 full_dim,
                 full_B,
                 full_dim,
+                &beta,
                 full_C,
                 full_dim
             ) );
