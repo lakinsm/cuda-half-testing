@@ -47,11 +47,11 @@ int main() {
     utils.recordStartTime();
     // Initialize full sm_61
     HANDLE_ERROR( cudaSetDevice( sm61_gpu_idx ) );
-    HANDLE_ERROR( cudaHostAlloc( (void**)&full_host, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
-    HANDLE_ERROR( cudaHostAlloc( (void**)&full_res, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
-    HANDLE_ERROR( cudaMalloc( (void**)&full_A, full_dim * full_dim * sizeof(float) ) );
-    HANDLE_ERROR( cudaMalloc( (void**)&full_B, full_dim * full_dim * sizeof(float) ) );
-    HANDLE_ERROR( cudaMalloc( (void**)&full_C, full_dim * full_dim * sizeof(float) ) );
+    HANDLE_ERROR( cudaHostAlloc( &full_host, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaHostAlloc( &full_res, full_dim * full_dim * sizeof(float), cudaHostAllocDefault ) );
+    HANDLE_ERROR( cudaMalloc( &full_A, full_dim * full_dim * sizeof(float) ) );
+    HANDLE_ERROR( cudaMalloc( &full_B, full_dim * full_dim * sizeof(float) ) );
+    HANDLE_ERROR( cudaMalloc( &full_C, full_dim * full_dim * sizeof(float) ) );
 
     for(int i = 0; i < full_dim * full_dim; ++i) {
         full_host[i] = 2;
