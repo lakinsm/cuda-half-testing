@@ -14,8 +14,8 @@ int main() {
 
 
     // cuBLAS handles, constants, etc
-    float alpha = 1;
-    float beta = 0;
+    float alpha = 1.0f;
+    float beta = 0.0f;
     cublasHandle_t handle;
     BLAS_HANDLE_ERROR( cublasCreate( &handle ) );
 
@@ -59,6 +59,7 @@ int main() {
 
     HANDLE_ERROR( cudaMemcpy( full_A, full_host, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( full_B, full_host, full_dim * full_dim * sizeof(float), cudaMemcpyHostToDevice ) );
+    HANDLE_ERROR( cudaDeviceSynchronize() );
 
 
     // Compute full sm_61
