@@ -158,6 +158,7 @@ int main() {
     std::cout << utils.timeDifference() << " seconds" << std::endl;
 
     for(int i = 0; i < half_dim * half_dim; ++i) {
+        std::cout << __half2float(half_res1[i]) << std::endl;
         assert(__half2float(half_res1[i]) == 4 * half_dim);
     }
 
@@ -169,7 +170,7 @@ int main() {
     HANDLE_ERROR( cudaFree( half_A1 ) );
     HANDLE_ERROR( cudaFree( half_B1 ) );
     HANDLE_ERROR( cudaFree( half_C1 ) );
-    
+
 
 
 
