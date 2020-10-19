@@ -23,21 +23,22 @@ int main() {
 
     utils.recordStartTime();
     float temp4 = 100.0f;
-    float temp5;
+    float temp5, temp_sub1;
     for(int i = 0; i < 1000000; ++i) {
         temp5 = std::log(temp4);
+        temp_sub1 = temp4 - temp5;
     }
-    float temp_sub1 = temp4 - temp5;
+
     utils.recordStopTime();
     std::cout << temp_sub1 << '\t' << utils.timeDifference() << std::endl;
 
     utils.recordStartTime();
     __half temp6 = __float2half(100.0f);
-    __half temp7;
+    __half temp7, temp_sub2;
     for(int i = 0; i < 1000000; ++i) {
         temp7 = __float2half(std::log(__half2float(temp6)));
+        temp_sub2 = temp6 - temp7;
     }
-    __half temp_sub2 = temp6 - temp7;
     utils.recordStopTime();
     std::cout << temp_sub2 << '\t' << utils.timeDifference() << std::endl;
 
