@@ -10,8 +10,8 @@ int main() {
     __half temp2 = __float2half(5.0f);
     __half temp3 = temp1 - temp2;
     std::cout << temp3 << std::endl;
-//    temp3 -= temp2;
-//    std::cout << temp3 << std::endl;
+
+
 
 
 
@@ -20,6 +20,22 @@ int main() {
     int sm75_gpu_idx = 0;  // 2080Ti, Turing CUDA 7.5 with Tensor cores
     int full_dim = 20000;
     int half_dim = full_dim;
+
+    utils.recordStartTime();
+    float temp4 = 100.0f;
+    for(int i = 0, i < 1000; ++i) {
+        float temp5 = std::log(temp4);
+    }
+    utils.recordStopTime();
+    std::cout << utils.timeDifference() << std::endl;
+
+    utils.recordStartTime();
+    __half temp6 = __float2half(100.0f);
+    for(int i = 0, i < 1000; ++i) {
+        __half temp7 = __float2half(std::log(__half2float(temp6)));
+    }
+    utils.recordStopTime();
+    std::cout << utils.timeDifference() << std::endl;
 
 
     // cuBLAS handles, constants, etc
