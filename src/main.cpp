@@ -6,6 +6,15 @@
 
 
 int main() {
+    __half temp1 __float2half(1.0f);
+    __half temp2 __flat2half(5.0f);
+    __half temp3 = temp1 - temp2;
+    std::cout << temp3 << std::endl;
+    temp3 -= temp2;
+    std::cout << temp3 << std::endl;
+
+
+
     HostUtils utils;
     int sm61_gpu_idx = 2;  // 1080Ti, Pascal CUDA 6.1
     int sm75_gpu_idx = 0;  // 2080Ti, Turing CUDA 7.5 with Tensor cores
