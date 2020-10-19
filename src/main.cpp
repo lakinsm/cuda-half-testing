@@ -23,7 +23,7 @@ int main() {
 
     utils.recordStartTime();
     float temp4 = 100.0f;
-    for(int i = 0, i < 1000; ++i) {
+    for(int i = 0; i < 1000; ++i) {
         float temp5 = std::log(temp4);
     }
     utils.recordStopTime();
@@ -31,7 +31,7 @@ int main() {
 
     utils.recordStartTime();
     __half temp6 = __float2half(100.0f);
-    for(int i = 0, i < 1000; ++i) {
+    for(int i = 0; i < 1000; ++i) {
         __half temp7 = __float2half(std::log(__half2float(temp6)));
     }
     utils.recordStopTime();
