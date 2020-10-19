@@ -24,7 +24,7 @@ int main() {
     utils.recordStartTime();
     float temp4 = 100.0f;
     float temp5;
-    for(int i = 0; i < 100000; ++i) {
+    for(int i = 0; i < 1000000; ++i) {
         temp5 = std::log(temp4);
     }
     float temp_sub1 = temp4 - temp5;
@@ -34,7 +34,7 @@ int main() {
     utils.recordStartTime();
     __half temp6 = __float2half(100.0f);
     __half temp7;
-    for(int i = 0; i < 100000; ++i) {
+    for(int i = 0; i < 1000000; ++i) {
         temp7 = __float2half(std::log(__half2float(temp6)));
     }
     __half temp_sub2 = temp6 - temp7;
